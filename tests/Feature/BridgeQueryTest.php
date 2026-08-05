@@ -2,6 +2,9 @@
 
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Http;
+use WiserWebSolutions\ChesCoGis\Bridges\BridgeConditionEnum;
+use WiserWebSolutions\ChesCoGis\Bridges\BridgeOwnerEnum;
+use WiserWebSolutions\ChesCoGis\Bridges\BridgePostStatusEnum;
 use WiserWebSolutions\ChesCoGis\Exceptions\ArcGisQueryException;
 use WiserWebSolutions\ChesCoGis\Facades\ChesCoGis;
 
@@ -111,6 +114,54 @@ it('filters by a sufficiency rating range', function () {
     ChesCoGis::bridges()->whereSufficiencyRatingBetween(40, 60)->each()->all();
 
     Http::assertSent(fn ($request) => str_contains(urldecode((string) $request->url()), 'where=SUFFICIENCY_RATING BETWEEN 40 AND 60'));
+});
+
+it('filters by one or more deck condition ratings using BridgeConditionEnum', function () {
+    Http::fake(['*' => Http::response(['features' => [], 'exceededTransferLimit' => false])]);
+
+    ChesCoGis::bridges()->whereDeckCondition(BridgeConditionEnum::Poor, BridgeConditionEnum::Serious)->each()->all();
+
+    Http::assertSent(fn ($request) => str_contains(urldecode((string) $request->url()), "where=DECK_CONDITION IN ('4', '3')"));
+});
+
+it('filters by one or more superstructure condition ratings using BridgeConditionEnum', function () {
+    Http::fake(['*' => Http::response(['features' => [], 'exceededTransferLimit' => false])]);
+
+    ChesCoGis::bridges()->whereSuperstructureCondition(BridgeConditionEnum::Good)->each()->all();
+
+    Http::assertSent(fn ($request) => str_contains(urldecode((string) $request->url()), "where=SUPERSTRUCTURE_CONDITION IN ('7')"));
+});
+
+it('filters by one or more substructure condition ratings using BridgeConditionEnum', function () {
+    Http::fake(['*' => Http::response(['features' => [], 'exceededTransferLimit' => false])]);
+
+    ChesCoGis::bridges()->whereSubstructureCondition(BridgeConditionEnum::NotApplicable)->each()->all();
+
+    Http::assertSent(fn ($request) => str_contains(urldecode((string) $request->url()), "where=SUBSTRUCTURE_CONDITION IN ('N')"));
+});
+
+it('filters by one or more culvert condition ratings using BridgeConditionEnum', function () {
+    Http::fake(['*' => Http::response(['features' => [], 'exceededTransferLimit' => false])]);
+
+    ChesCoGis::bridges()->whereCulvertCondition(BridgeConditionEnum::Good)->each()->all();
+
+    Http::assertSent(fn ($request) => str_contains(urldecode((string) $request->url()), "where=CULVERT_CONDITION IN ('7')"));
+});
+
+it('filters by one or more owning agencies using BridgeOwnerEnum', function () {
+    Http::fake(['*' => Http::response(['features' => [], 'exceededTransferLimit' => false])]);
+
+    ChesCoGis::bridges()->whereOwnerCode(BridgeOwnerEnum::CountyHighwayAgency)->each()->all();
+
+    Http::assertSent(fn ($request) => str_contains(urldecode((string) $request->url()), "where=OWNER_CODE IN ('02')"));
+});
+
+it('filters by one or more posting statuses using BridgePostStatusEnum', function () {
+    Http::fake(['*' => Http::response(['features' => [], 'exceededTransferLimit' => false])]);
+
+    ChesCoGis::bridges()->wherePostStatus(BridgePostStatusEnum::Posted)->each()->all();
+
+    Http::assertSent(fn ($request) => str_contains(urldecode((string) $request->url()), "where=POST_STATUS IN ('POSTED')"));
 });
 
 it('get() eagerly pages through the FeatureServer into a Collection', function () {

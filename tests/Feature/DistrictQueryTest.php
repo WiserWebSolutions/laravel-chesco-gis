@@ -72,7 +72,7 @@ it('throws when the FeatureServer returns an ArcGIS error payload', function () 
 it('filters by one or more district numbers', function () {
     Http::fake(['*' => Http::response(['features' => [], 'exceededTransferLimit' => false])]);
 
-    ChesCoGis::congressionalDistricts()->whereDistrictNumber('6', '7')->each()->all();
+    ChesCoGis::congressionalDistricts()->whereDistrictNumber(6, 7)->each()->all();
 
     Http::assertSent(fn ($request) => str_contains(urldecode((string) $request->url()), "where=LEG_DISTRICT IN ('6', '7')"));
 });

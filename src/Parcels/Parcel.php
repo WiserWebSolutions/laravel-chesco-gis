@@ -7,6 +7,7 @@ readonly class Parcel
     public function __construct(
         public string $upi,
         public ?string $locAddress,
+        public ?StreetDirectionEnum $streetDirection,
         public ?MunicipalityEnum $municipality,
         public ?SchoolDistrictEnum $schoolDistrict,
         public ?float $totalAssessment,
@@ -33,6 +34,7 @@ readonly class Parcel
         return new self(
             upi: $upi,
             locAddress: $attributes['LOC_ADDRESS'] ?? null,
+            streetDirection: isset($attributes['DIR']) ? StreetDirectionEnum::tryFrom((string) $attributes['DIR']) : null,
             municipality: isset($attributes['MUNI']) ? MunicipalityEnum::tryFrom((string) $attributes['MUNI']) : null,
             schoolDistrict: isset($attributes['SCHDIST']) ? SchoolDistrictEnum::tryFrom((string) $attributes['SCHDIST']) : null,
             totalAssessment: isset($attributes['TOT_ASSESS']) ? (float) $attributes['TOT_ASSESS'] : null,

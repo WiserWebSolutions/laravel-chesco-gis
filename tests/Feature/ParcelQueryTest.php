@@ -8,6 +8,7 @@ use WiserWebSolutions\ChesCoGis\Parcels\LandUseEnum;
 use WiserWebSolutions\ChesCoGis\Parcels\MunicipalityEnum;
 use WiserWebSolutions\ChesCoGis\Parcels\PropertyClassEnum;
 use WiserWebSolutions\ChesCoGis\Parcels\SchoolDistrictEnum;
+use WiserWebSolutions\ChesCoGis\Parcels\StreetDirectionEnum;
 
 it('pages through the FeatureServer until exceededTransferLimit is false', function () {
     Http::fake([
@@ -115,6 +116,14 @@ it('filters by one or more UPIs', function () {
 it('throws when a where-in filter is given no values', function () {
     ChesCoGis::parcels()->whereUpi();
 })->throws(InvalidArgumentException::class);
+
+it('filters by one or more street directions using StreetDirectionEnum', function () {
+    Http::fake(['*' => Http::response(['features' => [], 'exceededTransferLimit' => false])]);
+
+    ChesCoGis::parcels()->whereStreetDirection(StreetDirectionEnum::North)->each()->all();
+
+    Http::assertSent(fn ($request) => str_contains(urldecode((string) $request->url()), "where=DIR IN ('N')"));
+});
 
 it('filters by an assessed value range', function () {
     Http::fake(['*' => Http::response(['features' => [], 'exceededTransferLimit' => false])]);

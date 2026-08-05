@@ -13,8 +13,8 @@ class BridgeQuery
     use BuildsWhereClauses;
 
     protected const OUT_FIELDS = 'BRIDGE_ID,PENNDOT_ID,BRIDGE_NAME,LOCATION,FEATURE_CARRIED,FEATURE_INTERSECTED,'
-        .'OWNER_DESC,LENGTH,YEAR_BUILT,DECK_CONDITION,SUPERSTRUCTURE_CONDITION,SUBSTRUCTURE_CONDITION,'
-        .'STRUCT_DEFICIENT,FUNC_OBSOLETE,SUFFICIENCY_RATING,OBJECTID';
+        .'OWNER_CODE,OWNER_DESC,LENGTH,YEAR_BUILT,DECK_CONDITION,SUPERSTRUCTURE_CONDITION,SUBSTRUCTURE_CONDITION,'
+        .'CULVERT_CONDITION,POST_STATUS,STRUCT_DEFICIENT,FUNC_OBSOLETE,SUFFICIENCY_RATING,OBJECTID';
 
     protected bool $withGeometry = true;
 
@@ -60,6 +60,58 @@ class BridgeQuery
     public function whereSufficiencyRatingBetween(int|float $min, int|float $max): self
     {
         return $this->whereBetween('SUFFICIENCY_RATING', $min, $max);
+    }
+
+    /**
+     * Restrict to one or more deck condition ratings.
+     */
+    public function whereDeckCondition(BridgeConditionEnum ...$conditions): self
+    {
+        return $this->whereIn('DECK_CONDITION', array_map(fn ($condition) => $condition->value, $conditions));
+    }
+
+    /**
+     * Restrict to one or more superstructure condition ratings.
+     */
+    public function whereSuperstructureCondition(BridgeConditionEnum ...$conditions): self
+    {
+        return $this->whereIn('SUPERSTRUCTURE_CONDITION', array_map(fn ($condition) => $condition->value, $conditions));
+    }
+
+    /**
+     * Restrict to one or more substructure condition ratings.
+     */
+    public function whereSubstructureCondition(BridgeConditionEnum ...$conditions): self
+    {
+        return $this->whereIn('SUBSTRUCTURE_CONDITION', array_map(fn ($condition) => $condition->value, $conditions));
+    }
+
+    /**
+     * Restrict to one or more culvert condition ratings.
+     */
+    public function whereCulvertCondition(BridgeConditionEnum ...$conditions): self
+    {
+        return $this->whereIn('CULVERT_CONDITION', array_map(fn ($condition) => $condition->value, $conditions));
+    }
+
+    /**
+     * Restrict to one or more owning agencies. Note: `OWNER_CODE` is inconsistently
+     * entered upstream (some rows store the raw code, others the spelled-out
+     * description) — this filters server-side on the code form only, so it may
+     * miss rows recorded as text. {@see Bridge::$ownerCode} normalizes both forms
+     * after fetching, so filtering client-side is more reliable if this matters.
+     */
+    public function whereOwnerCode(BridgeOwnerEnum ...$owners): self
+    {
+        return $this->whereIn('OWNER_CODE', array_map(fn ($owner) => $owner->value, $owners));
+    }
+
+    /**
+     * Restrict to one or more posting statuses.
+     */
+    public function wherePostStatus(BridgePostStatusEnum ...$statuses): self
+    {
+        return $this->whereIn('POST_STATUS', array_map(fn ($status) => $status->value, $statuses));
     }
 
     /**

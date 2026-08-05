@@ -12,7 +12,7 @@ class ParcelQuery
 {
     use BuildsWhereClauses;
 
-    protected const OUT_FIELDS = 'UPI,LOC_ADDRESS,MUNI,SCHDIST,TOT_ASSESS,OWN1,LUC,CLASS,OBJECTID';
+    protected const OUT_FIELDS = 'UPI,LOC_ADDRESS,DIR,MUNI,SCHDIST,TOT_ASSESS,OWN1,LUC,CLASS,OBJECTID';
 
     public function __construct(
         protected ArcGisClient $client,
@@ -24,6 +24,14 @@ class ParcelQuery
     public function whereUpi(string ...$upis): self
     {
         return $this->whereIn('UPI', $upis);
+    }
+
+    /**
+     * Restrict to one or more street pre-directionals (e.g. the "N" in "123 N Main St").
+     */
+    public function whereStreetDirection(StreetDirectionEnum ...$directions): self
+    {
+        return $this->whereIn('DIR', array_map(fn ($direction) => $direction->value, $directions));
     }
 
     /**

@@ -27,7 +27,7 @@ ChesCoGis::parcels()
     ->get(); // Collection<Parcel>, eagerly pages through the entire FeatureServer
 
 ChesCoGis::parcels()
-    ->whereLandUse(LandUseEnum::R_10) // also: ->wherePropertyClass(...), ->whereUpi(...)
+    ->whereLandUse(LandUseEnum::R_10) // also: ->wherePropertyClass(...), ->whereUpi(...), ->whereStreetDirection(...)
     ->each() // LazyCollection<Parcel>, pages through the FeatureServer as consumed
     ->each(function ($parcel) {
         // $parcel->upi, $parcel->schoolDistrict, $parcel->totalAssessment, $parcel->hash(), ...
@@ -35,10 +35,11 @@ ChesCoGis::parcels()
         // $parcel->propertyClass is a WiserWebSolutions\ChesCoGis\Parcels\PropertyClassEnum enum (->description(), ->landUses())
         // $parcel->municipality is a WiserWebSolutions\ChesCoGis\Parcels\MunicipalityEnum enum (->description(), ->schoolDistricts())
         // $parcel->schoolDistrict is a WiserWebSolutions\ChesCoGis\Parcels\SchoolDistrictEnum enum (->description(), ->municipalities())
+        // $parcel->streetDirection is a WiserWebSolutions\ChesCoGis\Parcels\StreetDirectionEnum enum (->description())
     });
 
 ChesCoGis::congressionalDistricts() // also ::stateSenateDistricts(), ::stateHouseDistricts()
-    ->whereDistrictNumber('6', '7') // also: ->whereLastName(...)
+    ->whereDistrictNumber(6, 7) // also: ->whereLastName(...)
     ->each() // includes boundary geometry by default; call ->withoutGeometry() to skip it
     ->each(function ($district) {
         // $district->districtNumber, $district->representativeFirstName, $district->geometry, ...
@@ -47,9 +48,15 @@ ChesCoGis::congressionalDistricts() // also ::stateSenateDistricts(), ::stateHou
 ChesCoGis::bridges()
     ->whereStructurallyDeficient() // also: ->whereFunctionallyObsolete(), ->whereBridgeId(...)
     ->whereSufficiencyRatingBetween(0, 50) // also: ->whereSufficiencyRatingBelow(50)
+    ->whereDeckCondition(BridgeConditionEnum::Poor, BridgeConditionEnum::Serious) // also: ->whereSuperstructureCondition(...), ->whereSubstructureCondition(...), ->whereCulvertCondition(...)
+    ->wherePostStatus(BridgePostStatusEnum::Posted) // also: ->whereOwnerCode(BridgeOwnerEnum::CountyHighwayAgency, ...)
     ->each() // includes point geometry by default; call ->withoutGeometry() to skip it
     ->each(function ($bridge) {
         // $bridge->bridgeId, $bridge->name, $bridge->sufficiencyRating, $bridge->geometry, ...
+        // $bridge->deckCondition, $bridge->superstructureCondition, $bridge->substructureCondition, $bridge->culvertCondition are
+        // WiserWebSolutions\ChesCoGis\Bridges\BridgeConditionEnum (->description(), ->rating())
+        // $bridge->ownerCode is a WiserWebSolutions\ChesCoGis\Bridges\BridgeOwnerEnum (->description())
+        // $bridge->postStatus is a WiserWebSolutions\ChesCoGis\Bridges\BridgePostStatusEnum (->description())
     });
 ```
 
@@ -74,3 +81,11 @@ The enums in `src/Parcels` (`LandUseEnum`, `PropertyClassEnum`, `MunicipalityEnu
 - [`land-use-codes.pdf`](resources/reference/land-use-codes.pdf) — `LUC`/`CLASS` codes ([source](https://www.chesco.org/DocumentCenter/View/8673/Land_Use_Codes))
 - [`municipality-codes.pdf`](resources/reference/municipality-codes.pdf) — `MUNI` codes ([source](https://www.chesco.org/DocumentCenter/View/5366/muni_list_numberical_order))
 - [`school-district-codes.pdf`](resources/reference/school-district-codes.pdf) — `SCHDIST` codes, including which municipalities belong to each district ([source](https://www.chesco.org/DocumentCenter/View/5367))
+
+`src/Parcels/StreetDirectionEnum.php` is the standard 8-point street pre-directional abbreviation set (N/S/E/W/NE/NW/SE/SW) for the `DIR` field — not Chester County-specific either.
+
+`src/Bridges/BridgeConditionEnum.php` is the standard FHWA National Bridge Inventory (NBI) 0-9 condition rating scale (plus `N` for not applicable), used for the `DECK_CONDITION`, `SUPERSTRUCTURE_CONDITION`, `SUBSTRUCTURE_CONDITION`, and `CULVERT_CONDITION` fields — this one is a fixed federal standard rather than a Chester County-specific list, so there's no source PDF to keep a copy of.
+
+`src/Bridges/BridgeOwnerEnum.php` is the FHWA NBI Item 22 "Owner" code list for the `OWNER_CODE` field. That field is inconsistently entered upstream — some rows have the numeric code, others the spelled-out description, occasionally with the wrong value entirely (e.g. a name that doesn't belong there) — so `Bridge::fromFeature()` uses `BridgeOwnerEnum::fromRaw()` rather than the built-in `tryFrom()` to normalize all the forms actually seen in the data, falling back to `null` for anything unrecognized.
+
+`src/Bridges/BridgePostStatusEnum.php` covers the `POST_STATUS` field (`OPEN`/`CLOSED`/`POSTED`).

@@ -5,12 +5,14 @@ use WiserWebSolutions\ChesCoGis\Parcels\MunicipalityEnum;
 use WiserWebSolutions\ChesCoGis\Parcels\Parcel;
 use WiserWebSolutions\ChesCoGis\Parcels\PropertyClassEnum;
 use WiserWebSolutions\ChesCoGis\Parcels\SchoolDistrictEnum;
+use WiserWebSolutions\ChesCoGis\Parcels\StreetDirectionEnum;
 
 it('maps ArcGIS attribute names to typed properties', function () {
     $feature = Parcel::fromFeature([
         'attributes' => [
             'UPI' => '27-5-123',
             'LOC_ADDRESS' => '123 Main St',
+            'DIR' => 'N',
             'MUNI' => '15',
             'SCHDIST' => '08',
             'TOT_ASSESS' => '150000',
@@ -23,6 +25,7 @@ it('maps ArcGIS attribute names to typed properties', function () {
 
     expect($feature->upi)->toBe('27-5-123')
         ->and($feature->locAddress)->toBe('123 Main St')
+        ->and($feature->streetDirection)->toBe(StreetDirectionEnum::North)
         ->and($feature->municipality)->toBe(MunicipalityEnum::Phoenixville)
         ->and($feature->schoolDistrict)->toBe(SchoolDistrictEnum::Phoenixville)
         ->and($feature->totalAssessment)->toBe(150000.0)
@@ -48,6 +51,14 @@ it('falls back to null for an unrecognized code', function () {
         ->and($feature->propertyClass)->toBeNull()
         ->and($feature->municipality)->toBeNull()
         ->and($feature->schoolDistrict)->toBeNull();
+});
+
+it('falls back to null for an unrecognized street direction', function () {
+    $feature = Parcel::fromFeature([
+        'attributes' => ['UPI' => '27-5-123', 'DIR' => 'XX'],
+    ]);
+
+    expect($feature->streetDirection)->toBeNull();
 });
 
 it('throws when the feature has no UPI', function () {

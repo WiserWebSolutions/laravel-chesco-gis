@@ -28,7 +28,7 @@ class DistrictQuery
     /**
      * Restrict to one or more district numbers.
      */
-    public function whereDistrictNumber(string ...$districtNumbers): self
+    public function whereDistrictNumber(int ...$districtNumbers): self
     {
         return $this->whereIn('LEG_DISTRICT', $districtNumbers);
     }
