@@ -1,0 +1,5 @@
+providers:
+  - WiserWebSolutions\ChesCoGis\ChesCoGisServiceProvider
+
+env:
+  - CACHE_STORE=array

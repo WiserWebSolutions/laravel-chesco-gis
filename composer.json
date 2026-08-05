@@ -1,0 +1,60 @@
+{
+    "name": "wiserwebsolutions/laravel-chesco-gis",
+    "description": "Fluent Laravel client for Chester County's ArcGIS REST FeatureServer datasets (starting with parcels/owners, extensible to zoning, floodplains, and municipal boundaries).",
+    "type": "library",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Daniel Wiser",
+            "email": "dwiser@graboyes.com"
+        }
+    ],
+    "keywords": [
+        "laravel",
+        "arcgis",
+        "gis",
+        "chester-county",
+        "parcels",
+        "featureserver"
+    ],
+    "require": {
+        "php": "^8.2",
+        "illuminate/console": "^11.0|^12.0|^13.0",
+        "illuminate/contracts": "^11.0|^12.0|^13.0",
+        "illuminate/http": "^11.0|^12.0|^13.0",
+        "illuminate/support": "^11.0|^12.0|^13.0"
+    },
+    "require-dev": {
+        "orchestra/testbench": "^9.0|^10.0",
+        "pestphp/pest": "^3.0",
+        "pestphp/pest-plugin-laravel": "^3.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "WiserWebSolutions\\ChesCoGis\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "WiserWebSolutions\\ChesCoGis\\Tests\\": "tests/"
+        }
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "WiserWebSolutions\\ChesCoGis\\ChesCoGisServiceProvider"
+            ],
+            "aliases": {
+                "ChesCoGis": "WiserWebSolutions\\ChesCoGis\\Facades\\ChesCoGis"
+            }
+        }
+    },
+    "config": {
+        "sort-packages": true,
+        "allow-plugins": {
+            "pestphp/pest-plugin": true
+        }
+    },
+    "minimum-stability": "stable",
+    "prefer-stable": true
+}
